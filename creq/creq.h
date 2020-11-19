@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 #if defined(_WIN32) || defined(_WIN64)
     #define _os_type 0
@@ -19,7 +20,16 @@
 #define PORT_HTTP 80
 #define PORT_HTTPS 443
 
-namespace creq{
+
+
+// START NAMESPACE CREQ // 
+
+
+
+namespace creq
+{
+
+
 
 typedef struct types{
     int family;
@@ -29,22 +39,41 @@ typedef struct types{
 
 // Sockets //
 
+class Received {
+public:
+    char* data;
+    int result;
+    Received(char* data, int result);
+};
+
 class Socket{
 private:
     SOCKET con = INVALID_SOCKET;
     bool initalized = false;
+    bool connected = false;
+
 
     void _errorInit(std::string const message);
     bool  _initSocket(types);
     bool _initWin(types);
+    void _initMap();
 
 public:
-    Socket(int family, int type, int protocol);
+    Socket(int family = AF_INET, int type = SOCK_STREAM, int protocol = IPPROTO_TCP);
     ~Socket();
-    bool active();
+    bool Active();
+    bool Connected();
+    std::map<std::string, int> Options();
+
+    void Close();
     bool Connect(std::string host, int port);
+    int Send(std::string buf, int flags = 0);
+    char* Recv(int buflen, int flags = 0);
+    Received RecvDetails(int buflen, int flags = 0);
 
 };
+
+
 
 // Response // 
 class Response {
@@ -57,7 +86,7 @@ class Creq {
 
 private:
     bool initalized = false;
-    creq::Socket socket;
+    creq::Socket con;
 
 
 public:
@@ -66,4 +95,6 @@ public:
 
 
 };
+
 }
+// END NAMESPACE CREQ // 
